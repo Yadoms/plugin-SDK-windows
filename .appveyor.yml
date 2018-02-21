@@ -1,0 +1,142 @@
+# Appveyor script to build and deploy the Yadoms plugin-SDK for Windows
+
+# version format
+version: 1.0.{build}
+
+# Build worker image (VM template)
+image: Visual Studio 2017
+
+#---------------------------------#
+#       build configuration       #
+#---------------------------------#
+
+# build platform, i.e. x86, x64, Any CPU. This setting is optional.
+platform: Win32
+
+# build Configuration, i.e. Debug, Release, etc.
+configuration: Debug
+
+init:
+  - ps: echo "`n### Build and deploy Yadoms plugin-SDK for Windows`n`n"
+  
+
+# Add pre-compiled dependencies in cache
+cache:
+  - extra_libs\boost_1_65_1 -> '.appveyor.yml'
+  - extra_libs\poco-1.7.9-all -> '.appveyor.yml'
+  - extra_libs\openssl -> '.appveyor.yml'
+  - extra_libs\protobuf-3.4.1 -> '.appveyor.yml'
+  - extra_libs\swig-3.0.12 -> '.appveyor.yml'
+
+# scripts that run after cloning repository
+install:
+  # Download extra libs
+  - ps: echo "Download extra libs..."
+  - ps: if (!(Test-Path 'extra_libs')) { mkdir 'extra_libs' }
+  - ps: pushd extra_libs
+  - ps: if (!(Test-Path 'boost_1_65_1')) { Invoke-WebRequest http://yadoms.com/appveyor_build/boost_1_65_1-build.7z -OutFile boost.7z; 7z x boost.7z -bso0 }
+  - ps: if (!(Test-Path 'poco-1.7.9-all')) { Invoke-WebRequest http://yadoms.com/appveyor_build/poco-1.7.9-all-build.7z -OutFile poco.7z; 7z x poco.7z -bso0 }
+  - ps: if (!(Test-Path 'openssl')) { Invoke-WebRequest http://yadoms.com/appveyor_build/openssl-build.7z -OutFile openssl.7z; 7z x openssl.7z -bso0 }
+  - ps: if (!(Test-Path 'swig-3.0.12')) { Invoke-WebRequest http://yadoms.com/appveyor_build/swig-3.0.12-build.7z -OutFile swig.7z; 7z x swig.7z -bso0 }
+  - ps: if (!(Test-Path 'protobuf-3.4.1')) { Invoke-WebRequest http://yadoms.com/appveyor_build/protobuf-3.4.1-build.7z -OutFile protobuf.7z; 7z x protobuf.7z -bso0 }
+  - ps: rm *.7z
+  - ps: popd    
+  - ps: echo "[END] install"
+
+# scripts to run before build
+before_build:
+  # CMAKE 3.9.4
+  - ps: choco upgrade cmake.install --installargs 'ADD_CMAKE_TO_PATH=""System""'
+  - ps: $env:Path += ";C:\Program Files\CMake\bin"
+  - ps: refreshenv
+  - ps: cmake --version
+
+  # Yadoms sources
+  - ps: echo "Downloading yadoms sources from $env:buildBranch branch..."
+  - cmd: git clone -q --depth=1 --branch=%buildBranch% git://github.com/Yadoms/yadoms.git
+  
+  # Read current Yadoms version
+  - ps: $YadomsVersion = (Select-String -Pattern 'YadomsVersion\("(.*)"\)' -path .\yadoms\sources\server\Version.h).Matches.Groups[1].Value
+  - ps: echo "Yadoms version is $YadomsVersion"
+
+  # Yadoms configuration file
+  - ps: echo "Create Yadoms configuration file CMakeListsUserConfig.txt..."
+  - ps: $cd_for_cmake="$pwd".Replace("\", "/")
+  - ps: echo $cd_for_cmake
+  - ps: Set-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(BOOST_ROOT "' + $cd_for_cmake + '/extra_libs/boost_1_65_1")')
+  - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(POCO_ROOT "' + $cd_for_cmake + '/extra_libs/poco-1.7.9-all")')
+  - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(OPENSSL_ROOT "' + $cd_for_cmake + '/extra_libs/openssl")')
+  - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(PROTOBUF_ROOT "' + $cd_for_cmake + '/extra_libs/protobuf-3.4.1")')
+  - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(SWIG_ROOT "' + $cd_for_cmake + '/extra_libs/swig-3.0.12")')
+  - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(PYTHON_ROOT "C:/Python27")')
+  - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(COTIRE_USE ON)')
+  - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(COTIRE_USE_UNITY ON)')
+  - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(PYTHON_USE_SOURCES OFF)')
+  - ps: cat 'yadoms/sources/CMakeListsUserConfig.txt'
+  
+  # Create solution
+  - ps: pushd yadoms
+  - cmd: cmake_windows.cmd v141_xp
+  - ps: popd
+  
+build: off
+  # Use custom build
+  
+build_script:
+  # Build and create installer
+  - ps: pushd yadoms/projects
+  - ps: echo 'Build...'
+  - ps: msbuild shared/all_unity.vcxproj /p:Configuration=$env:configuration /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - ps: echo 'Finalize output...'
+  - ps: cp ../config/yadoms.ini ../builds/$env:configuration/
+  - ps: popd
+  # Generate SDK package
+  # TODO
+  # - ps: echo 'Create packages...'
+  # - ps: msbuild PACKAGE.vcxproj /p:Configuration=$env:configuration /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  # - ps: ls 'yadoms/builds/package'
+  # - ps: New-Item package -type directory
+  # - ps: Move-Item yadoms\builds\RELEASE .\package\package
+  # - ps: Copy-Item yadoms\update\scripts\update.cmd .\package\
+  
+  #   get version and last commit date
+  - ps: $version = Select-String -Path yadoms\sources\server\Version.h '.*\("(.*)"\)' -AllMatches | Foreach {$_.Matches | Foreach {$_.Groups[1] | Foreach {$_.Value}}}
+  - ps: $gitdate = git --git-dir=.\yadoms\.git log -1 --format=%cI 
+  # - ps: Write-Host "Generating package.zip for Yadoms " + $version + " release on " + $gitdate
+  # - ps: cd package
+  # - ps: $content = Get-Content '..\package.json.in'
+  # - ps: $content = $content -replace "__version__", $version
+  # - ps: $content = $content -replace "__gitdate__", $gitdate
+  # - ps: Out-File -InputObject $content -FilePath .\package.json -Encoding UTF8
+  # - ps: Copy-Item ..\yadoms\changelog.md .\
+  # - ps: Get-ChildItem * -Include *.ilk -Recurse | Remove-Item
+  # - ps: Get-ChildItem * -Include yadoms.ini -Recurse | Remove-Item
+  # - ps: 7z a -tzip ..\package.zip .\
+  # - ps: cd ..
+  
+# after_build:
+  # # Needed step to remove directory structure of artifacts
+  # - ps: |
+     # $packageFile = Get-ChildItem "yadoms/builds/package" -Name -Filter *.exe
+     # Push-AppveyorArtifact yadoms/builds/package/$packageFile -FileName $packageFile -DeploymentName 'Yadoms installer'
+     # $packageFile = Get-ChildItem "yadoms/builds/package" -Name -Filter *.zip
+     # Push-AppveyorArtifact yadoms/builds/package/$packageFile -FileName $packageFile -DeploymentName 'Yadoms portable'
+     # $packageFile = Get-ChildItem "." -Name -Filter *.zip
+     # Push-AppveyorArtifact $packageFile -FileName $packageFile -DeploymentName 'Yadoms Update package'
+
+# artifacts:
+  # - path: yadoms/builds/package/Yadoms-*.exe
+    # name: 'Yadoms installer'
+    
+  # - path: yadoms/builds/package/Yadoms-*.zip
+    # name: 'Yadoms portable'
+    
+deploy:
+  - provider: FTP
+    protocol: ftp
+    host: ftp.jano42.fr
+    username: janofnxr-yadoms
+    password:
+      secure: 8tosT9FAJxX+SRgkw02I1A==
+    folder: appveyor_build/win32
+    debug: true     # show complete FTP log
