@@ -47,12 +47,6 @@ install:
 
 # scripts to run before build
 before_build:
-  # CMAKE 3.9.4
-  - ps: choco upgrade cmake.install --installargs 'ADD_CMAKE_TO_PATH=""System""'
-  - ps: $env:Path += ";C:\Program Files\CMake\bin"
-  - ps: refreshenv
-  - ps: cmake --version
-
   # Yadoms sources
   - ps: Write-Host "Downloading yadoms sources from $env:buildBranch branch..."
   - cmd: git clone -q --depth=1 --branch=%buildBranch% git://github.com/Yadoms/yadoms.git
