@@ -17,7 +17,7 @@ platform: Win32
 configuration: Debug
 
 init:
-  - ps: echo "`n### Build and deploy Yadoms plugin-SDK for Windows`n`n"
+  - ps: Write-Host "`n### Build and deploy Yadoms plugin-SDK for Windows`n`n"
   
 
 # Add pre-compiled dependencies in cache
@@ -31,7 +31,7 @@ cache:
 # scripts that run after cloning repository
 install:
   # Download extra libs
-  - ps: echo "Download extra libs..."
+  - ps: Write-Host "Download extra libs..."
   - ps: if (!(Test-Path 'extra_libs')) { mkdir 'extra_libs' }
   - ps: pushd extra_libs
   - ps: if (!(Test-Path 'boost_1_65_1')) { Invoke-WebRequest http://yadoms.com/appveyor_build/boost_1_65_1-build.7z -OutFile boost.7z; 7z x boost.7z -bso0 }
@@ -41,7 +41,7 @@ install:
   - ps: if (!(Test-Path 'protobuf-3.4.1')) { Invoke-WebRequest http://yadoms.com/appveyor_build/protobuf-3.4.1-build.7z -OutFile protobuf.7z; 7z x protobuf.7z -bso0 }
   - ps: rm *.7z
   - ps: popd    
-  - ps: echo "[END] install"
+  - ps: Write-Host "[END] install"
 
 # scripts to run before build
 before_build:
@@ -52,17 +52,17 @@ before_build:
   - ps: cmake --version
 
   # Yadoms sources
-  - ps: echo "Downloading yadoms sources from $env:buildBranch branch..."
+  - ps: Write-Host "Downloading yadoms sources from $env:buildBranch branch..."
   - cmd: git clone -q --depth=1 --branch=%buildBranch% git://github.com/Yadoms/yadoms.git
   
   # Read current Yadoms version
-  - ps: $YadomsVersion = (Select-String -Pattern 'YadomsVersion\("(.*)"\)' -path .\yadoms\sources\server\Version.h).Matches.Groups[1].Value
-  - ps: echo "Yadoms version is $YadomsVersion"
+  - ps: $yadomsVersion = (Select-String -Pattern 'YadomsVersion\("(.*)"\)' -path .\yadoms\sources\server\Version.h).Matches.Groups[1].Value
+  - ps: Write-Host "Yadoms version is $yadomsVersion"
 
   # Yadoms configuration file
-  - ps: echo "Create Yadoms configuration file CMakeListsUserConfig.txt..."
+  - ps: Write-Host "Create Yadoms configuration file CMakeListsUserConfig.txt..."
   - ps: $cd_for_cmake="$pwd".Replace("\", "/")
-  - ps: echo $cd_for_cmake
+  - ps: Write-Host $cd_for_cmake
   - ps: Set-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(BOOST_ROOT "' + $cd_for_cmake + '/extra_libs/boost_1_65_1")')
   - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(POCO_ROOT "' + $cd_for_cmake + '/extra_libs/poco-1.7.9-all")')
   - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(OPENSSL_ROOT "' + $cd_for_cmake + '/extra_libs/openssl")')
@@ -83,38 +83,73 @@ build: off
   # Use custom build
   
 build_script:
-  # Build and create installer
+  # Build Yadoms
   - ps: pushd yadoms/projects
-  - ps: echo 'Build...'
+  - ps: Write-Host 'Build...'
   - ps: msbuild shared/all_unity.vcxproj /p:Configuration=$env:configuration /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - ps: echo 'Finalize output...'
+  - ps: Write-Host 'Finalize output...'
   - ps: cp ../config/yadoms.ini ../builds/$env:configuration/
   - ps: popd
-  # Generate SDK package
-  # TODO
-  # - ps: echo 'Create packages...'
-  # - ps: msbuild PACKAGE.vcxproj /p:Configuration=$env:configuration /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  # - ps: ls 'yadoms/builds/package'
-  # - ps: New-Item package -type directory
-  # - ps: Move-Item yadoms\builds\RELEASE .\package\package
-  # - ps: Copy-Item yadoms\update\scripts\update.cmd .\package\
+
+  # Copy all files to generate SDK package
+  - ps: Write-Host 'Copy all files to generate SDK package...'
+  - ps: $yadomsRoot = ".\yadoms"
+  - ps: $boostRoot = ".\extra_libs\boost_1_65_1"
+  - ps: $pocoRoot = ".\extra_libs\poco-1.7.9-all"
+  - ps: $out=".\SDK"
+  - ps: $robocopyFlags="/MT","/np","/njh","/njs","/ns","/nc"
+  # Clean
+  - ps: Write-Host "Clean $out folder..."
+  - ps: Remove-Item $out -Force -Recurse -ErrorAction SilentlyContinue
+  # Copy Boost
+  - ps: Write-Host "Copy Boost folder..."
+  - ps: robocopy "$boostRoot\boost" "$out\libs\boost\boost" $robocopyFlags /e
+  - ps: robocopy "$boostRoot\stage" "$out\libs\boost\stage" $robocopyFlags /e
+  # Copy Poco
+  - ps: Write-Host "Copy Poco folder..."
+  - ps: robocopy "$pocoRoot\lib" "$out\libs\poco\lib" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot" "$out\libs\poco" "VERSION" $robocopyFlags
+  - ps: robocopy "$pocoRoot\Util\src" "$out\libs\poco\Util\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Util\include" "$out\libs\poco\Util\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\NetSSL_OpenSSL\src" "$out\libs\poco\NetSSL_OpenSSL\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\NetSSL_OpenSSL\include" "$out\libs\poco\NetSSL_OpenSSL\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Crypto\src" "$out\libs\poco\Crypto\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Crypto\include" "$out\libs\poco\Crypto\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Zip\src" "$out\libs\poco\Zip\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Zip\include" "$out\libs\poco\Zip\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\XML\src" "$out\libs\poco\XML\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\XML\include" "$out\libs\poco\XML\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Net\src" "$out\libs\poco\Net\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Net\include" "$out\libs\poco\Net\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\JSON\src" "$out\libs\poco\JSON\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\JSON\include" "$out\libs\poco\JSON\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Foundation\src" "$out\libs\poco\Foundation\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Foundation\include" "$out\libs\poco\Foundation\include" $robocopyFlags /e
+  # Copy Yadoms
+  - ps: Write-Host "Copy Yadoms folder..."
+  - ps: robocopy "$yadomsRoot\sources" "$out\yadoms\sources" $robocopyFlags /e /xd "plugins"
+  - ps: robocopy "$yadomsRoot\sources\plugins" "$out\yadoms\sources\plugins" $robocopyFlags 
+  - ps: robocopy "$yadomsRoot\sources\plugins\common" "$out\yadoms\sources\plugins\common" $robocopyFlags /e
+  - ps: robocopy "$yadomsRoot\sources\plugins\dev-EmptyPlugin" "$out\yadoms\sources\plugins\dev-EmptyPlugin" $robocopyFlags /e
+  - ps: robocopy "$yadomsRoot\sources\plugins\dev-FakePlugin" "$out\yadoms\sources\plugins\dev-FakePlugin" $robocopyFlags /e
+  - ps: robocopy "$yadomsRoot\licensing" "$out\yadoms\licensing" $robocopyFlags /e
+  - ps: robocopy "$yadomsRoot\psd" "$out\yadoms\psd" $robocopyFlags /e
+  - ps: robocopy "$yadomsRoot\builds\DEBUG" "$out\yadoms\builds\DEBUG" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\builds\RELEASE" "$out\yadoms\builds\RELEASE" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\projects\shared\DEBUG" "$out\yadoms\projects\shared\DEBUG" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\projects\shared\RELEASE" "$out\yadoms\projects\shared\RELEASE" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\projects\plugin_cpp_api\DEBUG" "$out\yadoms\projects\plugin_cpp_api\DEBUG" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\projects\plugin_cpp_api\RELEASE" "$out\yadoms\projects\plugin_cpp_api\RELEASE" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\projects\plugin_IPC\DEBUG" "$out\yadoms\projects\plugin_IPC\DEBUG" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\projects\plugin_IPC\RELEASE" "$out\yadoms\projects\plugin_IPC\RELEASE" $robocopyFlags /e /xf "*.ilk"
+
+  # Create the SDK package
+  - ps: Write-Host 'Create the SDK package...'
+  - ps: $yadomsGitdate = git --git-dir=.\yadoms\.git log -1 --format=%cI 
+  - ps: Write-Host "Generating SDK package for Yadoms " + $yadomsVersion + " released on " + $yadomsGitdate
+  - ps: 7z a -tzip plugin-SDK-windows-$yadomsVersion.zip $out
   
-  #   get version and last commit date
-  - ps: $version = Select-String -Path yadoms\sources\server\Version.h '.*\("(.*)"\)' -AllMatches | Foreach {$_.Matches | Foreach {$_.Groups[1] | Foreach {$_.Value}}}
-  - ps: $gitdate = git --git-dir=.\yadoms\.git log -1 --format=%cI 
-  # - ps: Write-Host "Generating package.zip for Yadoms " + $version + " release on " + $gitdate
-  # - ps: cd package
-  # - ps: $content = Get-Content '..\package.json.in'
-  # - ps: $content = $content -replace "__version__", $version
-  # - ps: $content = $content -replace "__gitdate__", $gitdate
-  # - ps: Out-File -InputObject $content -FilePath .\package.json -Encoding UTF8
-  # - ps: Copy-Item ..\yadoms\changelog.md .\
-  # - ps: Get-ChildItem * -Include *.ilk -Recurse | Remove-Item
-  # - ps: Get-ChildItem * -Include yadoms.ini -Recurse | Remove-Item
-  # - ps: 7z a -tzip ..\package.zip .\
-  # - ps: cd ..
-  
-# after_build:
+# after_build: TODO ménage ?
   # # Needed step to remove directory structure of artifacts
   # - ps: |
      # $packageFile = Get-ChildItem "yadoms/builds/package" -Name -Filter *.exe
@@ -124,12 +159,9 @@ build_script:
      # $packageFile = Get-ChildItem "." -Name -Filter *.zip
      # Push-AppveyorArtifact $packageFile -FileName $packageFile -DeploymentName 'Yadoms Update package'
 
-# artifacts:
-  # - path: yadoms/builds/package/Yadoms-*.exe
-    # name: 'Yadoms installer'
-    
-  # - path: yadoms/builds/package/Yadoms-*.zip
-    # name: 'Yadoms portable'
+artifacts:
+  - path: plugin-SDK-windows-*.zip
+    name: 'Yadoms plugin SDK for Windows'
     
 deploy:
   - provider: FTP
@@ -139,4 +171,4 @@ deploy:
     password:
       secure: 8tosT9FAJxX+SRgkw02I1A==
     folder: appveyor_build/win32
-    debug: true     # show complete FTP log
+    debug: true     # show complete FTP log TODO virer
