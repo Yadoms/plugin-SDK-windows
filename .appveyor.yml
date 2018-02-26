@@ -23,7 +23,7 @@ init:
 
 # Add pre-compiled dependencies in cache
 cache:
-  - extra_libs\boost_$env:boostVersion -> '.appveyor.yml'
+  - extra_libs\boost_"$env:boostVersion" -> '.appveyor.yml'
   - extra_libs\poco-1.7.9-all -> '.appveyor.yml'
   - extra_libs\openssl -> '.appveyor.yml'
   - extra_libs\protobuf-3.4.1 -> '.appveyor.yml'
