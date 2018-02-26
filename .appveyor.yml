@@ -100,11 +100,12 @@ build_script:
   - ps: $yadomsRoot = ".\yadoms"
   - ps: $boostRoot = ".\extra_libs\boost_1_65_1"
   - ps: $pocoRoot = ".\extra_libs\poco-1.7.9-all"
+  - ps: $cmakeRoot = ".\extra_libs\cmake-3.10.2"
   - ps: $out=".\SDK"
   - ps: $robocopyFlags="/MT","/np","/njh","/njs","/ns","/nc"
   # Clean
   - ps: Write-Host "Clean $out folder..."
-  - ps: Remove-Item $out -Force -Recurse -ErrorAction SilentlyContinue
+  - ps: if(Test-Path -Path $out) Remove-Item $out -Force -Recurse -ErrorAction SilentlyContinue
   # Copy Boost
   - ps: Write-Host "Copy Boost folder..."
   - ps: robocopy "$boostRoot\boost" "$out\libs\boost\boost" $robocopyFlags /e
@@ -129,6 +130,9 @@ build_script:
   - ps: robocopy "$pocoRoot\JSON\include" "$out\libs\poco\JSON\include" $robocopyFlags /e
   - ps: robocopy "$pocoRoot\Foundation\src" "$out\libs\poco\Foundation\src" $robocopyFlags /e
   - ps: robocopy "$pocoRoot\Foundation\include" "$out\libs\poco\Foundation\include" $robocopyFlags /e
+  # Copy CMake
+  - ps: Write-Host "Copy CMake folder..."
+  - ps: robocopy "$cmakeRoot" "$out\libs\cmake" $robocopyFlags /e
   # Copy Yadoms
   - ps: Write-Host "Copy Yadoms folder..."
   - ps: robocopy "$yadomsRoot\sources" "$out\yadoms\sources" $robocopyFlags /e /xd "plugins"
