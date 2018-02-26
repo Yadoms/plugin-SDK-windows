@@ -105,7 +105,7 @@ build_script:
   - ps: $robocopyFlags="/MT","/np","/njh","/njs","/ns","/nc"
   # Clean
   - ps: Write-Host "Clean $out folder..."
-  - ps: if(Test-Path -Path $out) Remove-Item $out -Force -Recurse -ErrorAction SilentlyContinue
+  - ps: if (Test-Path -Path $out) { Remove-Item $out -Force -Recurse -ErrorAction SilentlyContinue }
   # Copy Boost
   - ps: Write-Host "Copy Boost folder..."
   - ps: robocopy "$boostRoot\boost" "$out\libs\boost\boost" $robocopyFlags /e
