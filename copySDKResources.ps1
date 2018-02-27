@@ -10,8 +10,8 @@ $robocopyFlags="/MT","/np","/njh","/ns","/nc","/nfl","/ndl"
   
 # Copy Boost
 Write-Host "Copy Boost folder..."
-robocopy "$boostRoot\boost" "$sdkOut\libs\boost\boost" $robocopyFlags /e && exit 0
-robocopy "$boostRoot\stage" "$sdkOut\libs\boost\stage" $robocopyFlags /e && exit 0
+robocopy "$boostRoot\boost" "$sdkOut\libs\boost\boost" $robocopyFlags /e
+robocopy "$boostRoot\stage" "$sdkOut\libs\boost\stage" $robocopyFlags /e
 
 # Copy Poco
 Write-Host "Copy Poco folder..."
