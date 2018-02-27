@@ -110,8 +110,8 @@ build_script:
   - ps: if (Test-Path -Path $sdkOut) { Remove-Item $sdkOut -Force -Recurse -ErrorAction SilentlyContinue }
   # Copy Boost
   - ps: Write-Host "Copy Boost folder..."
-  - ps: (robocopy "$boostRoot\boost" "$sdkOut\libs\boost\boost" $robocopyFlags /e) ^& IF %ERRORLEVEL% LEQ 1 exit 0
-  - ps: (robocopy "$boostRoot\stage" "$sdkOut\libs\boost\stage" $robocopyFlags /e) ^& IF %ERRORLEVEL% LEQ 1 exit 0
+  - ps: robocopy "$boostRoot\boost" "$sdkOut\libs\boost\boost" $robocopyFlags /e; if ($lastExitCode -gt 1) { exit 1}
+  - ps: robocopy "$boostRoot\stage" "$sdkOut\libs\boost\stage" $robocopyFlags /e; if ($lastExitCode -gt 1) { exit 1}
   # Copy Poco
   - ps: Write-Host "Copy Poco folder..."
   - ps: robocopy "$pocoRoot\lib" "$sdkOut\libs\poco\lib" $robocopyFlags /e
