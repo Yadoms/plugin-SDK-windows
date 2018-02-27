@@ -16,7 +16,7 @@ platform: Win32
 # build Configuration, i.e. Debug, Release, etc.
 configuration:
   - Debug
-#TODO à remettre  - Release
+  - Release
 
 init:
   - ps: Write-Host "`n### Build and deploy Yadoms plugin-SDK for Windows`n`n"
