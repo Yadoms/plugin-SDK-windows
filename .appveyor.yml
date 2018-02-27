@@ -14,7 +14,9 @@ image: Visual Studio 2017
 platform: Win32
 
 # build Configuration, i.e. Debug, Release, etc.
-configuration: Debug
+configuration:
+  - Debug
+  - Release
 
 init:
   - ps: Write-Host "`n### Build and deploy Yadoms plugin-SDK for Windows`n`n"
@@ -101,61 +103,61 @@ build_script:
   - ps: $boostRoot = ".\extra_libs\boost_1_65_1"
   - ps: $pocoRoot = ".\extra_libs\poco-1.7.9-all"
   - ps: $cmakeRoot = ".\extra_libs\cmake-3.10.2"
-  - ps: $out=".\SDK"
-  - ps: $robocopyFlags="/MT","/np","/njh","/njs","/ns","/nc"
+  - ps: $sdkOut=".\SDK"
+  - ps: $robocopyFlags="/MT","/njh","/ns","/nc","/nfl","/ndl"
   # Clean
-  - ps: Write-Host "Clean $out folder..."
-  - ps: if (Test-Path -Path $out) { Remove-Item $out -Force -Recurse -ErrorAction SilentlyContinue }
+  - ps: Write-Host "Clean $sdkOut folder..."
+  - ps: if (Test-Path -Path $sdkOut) { Remove-Item $sdkOut -Force -Recurse -ErrorAction SilentlyContinue }
   # Copy Boost
   - ps: Write-Host "Copy Boost folder..."
-  - ps: robocopy "$boostRoot\boost" "$out\libs\boost\boost" $robocopyFlags /e
-  - ps: robocopy "$boostRoot\stage" "$out\libs\boost\stage" $robocopyFlags /e
+  - ps: robocopy "$boostRoot\boost" "$sdkOut\libs\boost\boost" $robocopyFlags /e
+  - ps: robocopy "$boostRoot\stage" "$sdkOut\libs\boost\stage" $robocopyFlags /e
   # Copy Poco
   - ps: Write-Host "Copy Poco folder..."
-  - ps: robocopy "$pocoRoot\lib" "$out\libs\poco\lib" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot" "$out\libs\poco" "VERSION" $robocopyFlags
-  - ps: robocopy "$pocoRoot\Util\src" "$out\libs\poco\Util\src" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\Util\include" "$out\libs\poco\Util\include" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\NetSSL_OpenSSL\src" "$out\libs\poco\NetSSL_OpenSSL\src" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\NetSSL_OpenSSL\include" "$out\libs\poco\NetSSL_OpenSSL\include" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\Crypto\src" "$out\libs\poco\Crypto\src" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\Crypto\include" "$out\libs\poco\Crypto\include" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\Zip\src" "$out\libs\poco\Zip\src" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\Zip\include" "$out\libs\poco\Zip\include" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\XML\src" "$out\libs\poco\XML\src" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\XML\include" "$out\libs\poco\XML\include" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\Net\src" "$out\libs\poco\Net\src" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\Net\include" "$out\libs\poco\Net\include" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\JSON\src" "$out\libs\poco\JSON\src" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\JSON\include" "$out\libs\poco\JSON\include" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\Foundation\src" "$out\libs\poco\Foundation\src" $robocopyFlags /e
-  - ps: robocopy "$pocoRoot\Foundation\include" "$out\libs\poco\Foundation\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\lib" "$sdkOut\libs\poco\lib" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot" "$sdkOut\libs\poco" "VERSION" $robocopyFlags
+  - ps: robocopy "$pocoRoot\Util\src" "$sdkOut\libs\poco\Util\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Util\include" "$sdkOut\libs\poco\Util\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\NetSSL_OpenSSL\src" "$sdkOut\libs\poco\NetSSL_OpenSSL\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\NetSSL_OpenSSL\include" "$sdkOut\libs\poco\NetSSL_OpenSSL\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Crypto\src" "$sdkOut\libs\poco\Crypto\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Crypto\include" "$sdkOut\libs\poco\Crypto\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Zip\src" "$sdkOut\libs\poco\Zip\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Zip\include" "$sdkOut\libs\poco\Zip\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\XML\src" "$sdkOut\libs\poco\XML\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\XML\include" "$sdkOut\libs\poco\XML\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Net\src" "$sdkOut\libs\poco\Net\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Net\include" "$sdkOut\libs\poco\Net\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\JSON\src" "$sdkOut\libs\poco\JSON\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\JSON\include" "$sdkOut\libs\poco\JSON\include" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Foundation\src" "$sdkOut\libs\poco\Foundation\src" $robocopyFlags /e
+  - ps: robocopy "$pocoRoot\Foundation\include" "$sdkOut\libs\poco\Foundation\include" $robocopyFlags /e
   # Copy CMake
   - ps: Write-Host "Copy CMake folder..."
-  - ps: robocopy "$cmakeRoot" "$out\libs\cmake" $robocopyFlags /e
+  - ps: robocopy "$cmakeRoot" "$sdkOut\libs\cmake" $robocopyFlags /e
   # Copy Yadoms
   - ps: Write-Host "Copy Yadoms folder..."
-  - ps: robocopy "$yadomsRoot\sources" "$out\yadoms\sources" $robocopyFlags /e /xd "plugins"
-  - ps: robocopy "$yadomsRoot\sources\plugins" "$out\yadoms\sources\plugins" $robocopyFlags 
-  - ps: robocopy "$yadomsRoot\sources\plugins\common" "$out\yadoms\sources\plugins\common" $robocopyFlags /e
-  - ps: robocopy "$yadomsRoot\sources\plugins\dev-EmptyPlugin" "$out\yadoms\sources\plugins\dev-EmptyPlugin" $robocopyFlags /e
-  - ps: robocopy "$yadomsRoot\sources\plugins\dev-FakePlugin" "$out\yadoms\sources\plugins\dev-FakePlugin" $robocopyFlags /e
-  - ps: robocopy "$yadomsRoot\licensing" "$out\yadoms\licensing" $robocopyFlags /e
-  - ps: robocopy "$yadomsRoot\psd" "$out\yadoms\psd" $robocopyFlags /e
-  - ps: robocopy "$yadomsRoot\builds\DEBUG" "$out\yadoms\builds\DEBUG" $robocopyFlags /e /xf "*.ilk"
-  - ps: robocopy "$yadomsRoot\builds\RELEASE" "$out\yadoms\builds\RELEASE" $robocopyFlags /e /xf "*.ilk"
-  - ps: robocopy "$yadomsRoot\projects\shared\DEBUG" "$out\yadoms\projects\shared\DEBUG" $robocopyFlags /e /xf "*.ilk"
-  - ps: robocopy "$yadomsRoot\projects\shared\RELEASE" "$out\yadoms\projects\shared\RELEASE" $robocopyFlags /e /xf "*.ilk"
-  - ps: robocopy "$yadomsRoot\projects\plugin_cpp_api\DEBUG" "$out\yadoms\projects\plugin_cpp_api\DEBUG" $robocopyFlags /e /xf "*.ilk"
-  - ps: robocopy "$yadomsRoot\projects\plugin_cpp_api\RELEASE" "$out\yadoms\projects\plugin_cpp_api\RELEASE" $robocopyFlags /e /xf "*.ilk"
-  - ps: robocopy "$yadomsRoot\projects\plugin_IPC\DEBUG" "$out\yadoms\projects\plugin_IPC\DEBUG" $robocopyFlags /e /xf "*.ilk"
-  - ps: robocopy "$yadomsRoot\projects\plugin_IPC\RELEASE" "$out\yadoms\projects\plugin_IPC\RELEASE" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\sources" "$sdkOut\yadoms\sources" $robocopyFlags /e /xd "plugins"
+  - ps: robocopy "$yadomsRoot\sources\plugins" "$sdkOut\yadoms\sources\plugins" $robocopyFlags 
+  - ps: robocopy "$yadomsRoot\sources\plugins\common" "$sdkOut\yadoms\sources\plugins\common" $robocopyFlags /e
+  - ps: robocopy "$yadomsRoot\sources\plugins\dev-EmptyPlugin" "$sdkOut\yadoms\sources\plugins\dev-EmptyPlugin" $robocopyFlags /e
+  - ps: robocopy "$yadomsRoot\sources\plugins\dev-FakePlugin" "$sdkOut\yadoms\sources\plugins\dev-FakePlugin" $robocopyFlags /e
+  - ps: robocopy "$yadomsRoot\licensing" "$sdkOut\yadoms\licensing" $robocopyFlags /e
+  - ps: robocopy "$yadomsRoot\psd" "$sdkOut\yadoms\psd" $robocopyFlags /e
+  - ps: robocopy "$yadomsRoot\builds\DEBUG" "$sdkOut\yadoms\builds\DEBUG" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\builds\RELEASE" "$sdkOut\yadoms\builds\RELEASE" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\projects\shared\DEBUG" "$sdkOut\yadoms\projects\shared\DEBUG" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\projects\shared\RELEASE" "$sdkOut\yadoms\projects\shared\RELEASE" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\projects\plugin_cpp_api\DEBUG" "$sdkOut\yadoms\projects\plugin_cpp_api\DEBUG" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\projects\plugin_cpp_api\RELEASE" "$sdkOut\yadoms\projects\plugin_cpp_api\RELEASE" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\projects\plugin_IPC\DEBUG" "$sdkOut\yadoms\projects\plugin_IPC\DEBUG" $robocopyFlags /e /xf "*.ilk"
+  - ps: robocopy "$yadomsRoot\projects\plugin_IPC\RELEASE" "$sdkOut\yadoms\projects\plugin_IPC\RELEASE" $robocopyFlags /e /xf "*.ilk"
 
   # Create the SDK package
   - ps: Write-Host 'Create the SDK package...'
   - ps: $yadomsGitdate = git --git-dir=.\yadoms\.git log -1 --format=%cI 
   - ps: Write-Host "Generating SDK package for Yadoms " + $yadomsVersion + " released on " + $yadomsGitdate
-  - ps: 7z a -tzip plugin-SDK-windows-$yadomsVersion.zip $out
+  - ps: 7z a -tzip plugin-SDK-windows-$yadomsVersion.zip $sdkOut
   
 # after_build: TODO ménage ?
   # # Needed step to remove directory structure of artifacts
