@@ -104,14 +104,14 @@ build_script:
   - ps: $pocoRoot = ".\extra_libs\poco-1.7.9-all"
   - ps: $cmakeRoot = ".\extra_libs\cmake-3.10.2"
   - ps: $sdkOut=".\SDK"
-  - ps: $robocopyFlags="/MT","/njh","/ns","/nc","/nfl","/ndl"
+  - ps: $robocopyFlags="/MT","/np","/njh","/ns","/nc","/nfl","/ndl"
   # Clean
   - ps: Write-Host "Clean $sdkOut folder..."
   - ps: if (Test-Path -Path $sdkOut) { Remove-Item $sdkOut -Force -Recurse -ErrorAction SilentlyContinue }
   # Copy Boost
   - ps: Write-Host "Copy Boost folder..."
-  - ps: robocopy "$boostRoot\boost" "$sdkOut\libs\boost\boost" $robocopyFlags /e
-  - ps: robocopy "$boostRoot\stage" "$sdkOut\libs\boost\stage" $robocopyFlags /e
+  - ps: (robocopy "$boostRoot\boost" "$sdkOut\libs\boost\boost" $robocopyFlags /e) ^& IF %ERRORLEVEL% LEQ 1 exit 0
+  - ps: (robocopy "$boostRoot\stage" "$sdkOut\libs\boost\stage" $robocopyFlags /e) ^& IF %ERRORLEVEL% LEQ 1 exit 0
   # Copy Poco
   - ps: Write-Host "Copy Poco folder..."
   - ps: robocopy "$pocoRoot\lib" "$sdkOut\libs\poco\lib" $robocopyFlags /e
