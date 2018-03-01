@@ -1,9 +1,11 @@
 
 
+$cmakeRoot = ".\extra_libs\cmake-3.10.2"
+
 $yadomsRoot = ".\yadoms"
 $boostRoot = ".\extra_libs\boost_1_65_1"
 $pocoRoot = ".\extra_libs\poco-1.7.9-all"
-$cmakeRoot = ".\extra_libs\cmake-3.10.2"
+$protobufRoot = ".\extra_libs\protobuf-3.4.1"
 $sdkOut=".\SDK"
 
 $robocopyFlags="/MT","/np","/njh","/ns","/nc","/nfl","/ndl"
@@ -12,6 +14,7 @@ $robocopyFlags="/MT","/np","/njh","/ns","/nc","/nfl","/ndl"
 Write-Host "Copy Boost folder..."
 robocopy "$boostRoot\boost" "$sdkOut\libs\boost\boost" $robocopyFlags /e
 robocopy "$boostRoot\stage" "$sdkOut\libs\boost\stage" $robocopyFlags /e
+#TODO vérifier que les fichiers dans "$sdkOut\libs\boost\*" soient aussi copiés
 
 # Copy Poco
 Write-Host "Copy Poco folder..."
@@ -34,6 +37,12 @@ robocopy "$pocoRoot\JSON\include" "$sdkOut\libs\poco\JSON\include" $robocopyFlag
 robocopy "$pocoRoot\Foundation\src" "$sdkOut\libs\poco\Foundation\src" $robocopyFlags /e
 robocopy "$pocoRoot\Foundation\include" "$sdkOut\libs\poco\Foundation\include" $robocopyFlags /e
 
+# Copy Protobuf
+Write-Host "Copy Protobuf folder..."
+robocopy "$protobufRoot\src" "$sdkOut\libs\protobuf\src" $robocopyFlags /e
+robocopy "$protobufRoot\vsprojects\Debug" "$sdkOut\libs\protobuf\vsprojects\Debug" $robocopyFlags /e /xf "*.ilk" "*.pdb"
+robocopy "$protobufRoot\vsprojects\Release" "$sdkOut\libs\protobuf\vsprojects\Release" $robocopyFlags /e /xf "*.ilk" "*.pdb"
+
 # Copy CMake
 Write-Host "Copy CMake folder..."
 robocopy "$cmakeRoot" "$sdkOut\libs\cmake" $robocopyFlags /e
@@ -55,3 +64,7 @@ robocopy "$yadomsRoot\projects\plugin_cpp_api\DEBUG" "$sdkOut\yadoms\projects\pl
 robocopy "$yadomsRoot\projects\plugin_cpp_api\RELEASE" "$sdkOut\yadoms\projects\plugin_cpp_api\RELEASE" $robocopyFlags /e /xf "*.ilk"
 robocopy "$yadomsRoot\projects\plugin_IPC\DEBUG" "$sdkOut\yadoms\projects\plugin_IPC\DEBUG" $robocopyFlags /e /xf "*.ilk"
 robocopy "$yadomsRoot\projects\plugin_IPC\RELEASE" "$sdkOut\yadoms\projects\plugin_IPC\RELEASE" $robocopyFlags /e /xf "*.ilk"
+
+# Copy SDK specific files
+Write-Host "Copy SDK specific files..."
+robocopy "cmake" "$sdkOut\sdk\cmake" $robocopyFlags /e
