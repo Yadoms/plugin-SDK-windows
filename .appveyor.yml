@@ -14,9 +14,7 @@ image: Visual Studio 2017
 platform: Win32
 
 # build Configuration, i.e. Debug, Release, etc.
-configuration:
-  - Debug
-  - Release
+configuration: Release
 
 init:
   - ps: Write-Host "`n### Build and deploy Yadoms plugin-SDK for Windows`n`n"
@@ -54,7 +52,7 @@ before_build:
   - cmd: git clone -q --depth=1 --branch=%buildBranch% git://github.com/Yadoms/yadoms.git
   
   # Read current Yadoms version
-  - ps: $yadomsVersion = Select-String -Path yadoms\sources\server\Version.h '.*\("(.*)"\)' -AllMatches | Foreach {$_.Matches | Foreach {$_.Groups[1] | Foreach {$_.Value}}}
+  - ps: $yadomsVersion = (Select-String -Path yadoms\sources\server\changelog.md -Pattern '^### (.*)$')[0] | Foreach-Object {$_.Matches} | Foreach-Object {$_.Groups[1].Value}
   - ps: Write-Host "Yadoms version is $yadomsVersion"
 
   # Yadoms configuration file
@@ -92,9 +90,11 @@ build_script:
   # Build Yadoms
   - ps: pushd yadoms/projects
   - ps: Write-Host 'Build...'
-  - ps: msbuild shared/all_unity.vcxproj /p:Configuration=$env:configuration /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - ps: msbuild shared/all_unity.vcxproj /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - ps: msbuild shared/all_unity.vcxproj /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
   - ps: Write-Host 'Finalize output...'
-  - ps: cp ../config/yadoms.ini ../builds/$env:configuration/
+  - ps: cp ../config/yadoms.ini ../builds/DEBUG/
+  - ps: cp ../config/yadoms.ini ../builds/RELEASE/
   - ps: popd
 
   # Copy all files to generate SDK package
@@ -112,16 +112,6 @@ build_script:
   - ps: Write-Host "Generating SDK package for Yadoms " + $yadomsVersion + " released on " + $yadomsGitdate
   - ps: 7z a -tzip plugin-SDK-windows-$yadomsVersion.zip $sdkOut
   
-# after_build: TODO ménage ?
-  # # Needed step to remove directory structure of artifacts
-  # - ps: |
-     # $packageFile = Get-ChildItem "yadoms/builds/package" -Name -Filter *.exe
-     # Push-AppveyorArtifact yadoms/builds/package/$packageFile -FileName $packageFile -DeploymentName 'Yadoms installer'
-     # $packageFile = Get-ChildItem "yadoms/builds/package" -Name -Filter *.zip
-     # Push-AppveyorArtifact yadoms/builds/package/$packageFile -FileName $packageFile -DeploymentName 'Yadoms portable'
-     # $packageFile = Get-ChildItem "." -Name -Filter *.zip
-     # Push-AppveyorArtifact $packageFile -FileName $packageFile -DeploymentName 'Yadoms Update package'
-
 artifacts:
   - path: plugin-SDK-windows-*.zip
     name: 'Yadoms plugin SDK for Windows'
@@ -134,4 +124,3 @@ deploy:
     password:
       secure: 8tosT9FAJxX+SRgkw02I1A==
     folder: appveyor_build/win32
-    debug: true     # show complete FTP log TODO virer
