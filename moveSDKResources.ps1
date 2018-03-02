@@ -8,7 +8,7 @@ $pocoRoot = ".\extra_libs\poco-1.7.9-all"
 $protobufRoot = ".\extra_libs\protobuf-3.4.1"
 $sdkOut=".\SDK"
 
-$robocopyFlags="/MT","/np","/njh","/ns","/nc","/nfl","/ndl" /move
+$robocopyFlags="/MT","/np","/njh","/ns","/nc","/nfl","/ndl",/move
   
 # Copy Boost
 Write-Host "Copy Boost folder..."
