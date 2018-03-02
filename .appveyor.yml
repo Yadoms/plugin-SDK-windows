@@ -104,7 +104,7 @@ build_script:
   - ps: Write-Host "Clean $sdkOut folder..."
   - ps: if (Test-Path -Path $sdkOut) { Remove-Item $sdkOut -Force -Recurse -ErrorAction SilentlyContinue }
   # Copy
-  - ps: .\copySDKResources.ps1
+  - ps: .\moveSDKResources.ps1
 
   # Create the SDK package
   - ps: Write-Host 'Create the SDK package...'
