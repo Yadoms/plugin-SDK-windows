@@ -21,13 +21,13 @@ init:
   
 
 # Add pre-compiled dependencies in cache
-cache:
-  - extra_libs\boost_1_65_1 -> '.appveyor.yml'
-  - extra_libs\poco-1.7.9-all -> '.appveyor.yml'
-  - extra_libs\openssl -> '.appveyor.yml'
-  - extra_libs\protobuf-3.4.1 -> '.appveyor.yml'
-  - extra_libs\swig-3.0.12 -> '.appveyor.yml'
-  - extra_libs\cmake-3.10.2 -> '.appveyor.yml'
+# cache:
+  # - extra_libs\boost_1_65_1 -> '.appveyor.yml'
+  # - extra_libs\poco-1.7.9-all -> '.appveyor.yml'
+  # - extra_libs\openssl -> '.appveyor.yml'
+  # - extra_libs\protobuf-3.4.1 -> '.appveyor.yml'
+  # - extra_libs\swig-3.0.12 -> '.appveyor.yml'
+  # - extra_libs\cmake-3.10.2 -> '.appveyor.yml'
 
 # scripts that run after cloning repository
 install:
