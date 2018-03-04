@@ -17,8 +17,8 @@ robocopy "$boostRoot\stage" "$sdkOut\libs\boost\stage" $robocopyFlags /e
 
 # Copy Poco
 Write-Host "Copy Poco folder..."
-robocopy "$pocoRoot\lib" "$sdkOut\libs\poco\lib" $robocopyFlags /e
 robocopy "$pocoRoot" "$sdkOut\libs\poco" "VERSION" $robocopyFlags
+robocopy "$pocoRoot\lib" "$sdkOut\libs\poco\lib" $robocopyFlags /e
 robocopy "$pocoRoot\Util\src" "$sdkOut\libs\poco\Util\src" $robocopyFlags /e
 robocopy "$pocoRoot\Util\include" "$sdkOut\libs\poco\Util\include" $robocopyFlags /e
 robocopy "$pocoRoot\NetSSL_OpenSSL\src" "$sdkOut\libs\poco\NetSSL_OpenSSL\src" $robocopyFlags /e
