@@ -11,6 +11,9 @@ endif()
 if (NOT PROTOBUF_ROOT)
 set(PROTOBUF_ROOT "${YADOMS_PLUGIN_SDK_ROOT}/libs/protobuf")
 endif()
+if (NOT OPENSSL_ROOT)
+set(OPENSSL_ROOT "${YADOMS_PLUGIN_SDK_ROOT}/libs/openssl")
+endif()
 
 set(YADOMS_ROOT "${YADOMS_PLUGIN_SDK_ROOT}/yadoms")
 
@@ -89,12 +92,7 @@ set(BOOST_INCL_DIR ${Boost_INCLUDE_DIR} ${BOOST_ROOT})
 SET(OPENSSL_USE_STATIC_LIBS TRUE)
 SET(OPENSSL_MSVC_STATIC_RT TRUE)
 SET(OPENSSL_ROOT_DIR ${OPENSSL_ROOT})
-FIND_PACKAGE(OpenSSL)
-
-if(NOT ${OPENSSL_FOUND})
-	message("Cannot find opensll, all plugins which requires SSL features will not be loaded")
-   set(OPENSSL_INCLUDE_DIR "")
-endif()
+FIND_PACKAGE(OpenSSL REQUIRED)
 
 ## Dependencies
 if(WIN32)
@@ -116,9 +114,13 @@ SET (POCO_LIBS
 	PocoFoundation
 )
 
-set(POCO_REQUIRE_MINIMUM_VERSION "1.7.3")
+set(POCO_REQUIRE_MINIMUM_VERSION "1.8.1")
 set(POCO_USE_STATIC_RUNTIME 1)
 add_definitions(-DPOCO_STATIC) 
+IF(WIN32) 
+   add_definitions(-DPOCO_EXTERNAL_OPENSSL) 
+ENDIF()
+ 
 include(${YADOMS_ROOT}/sources/cmake/FindPoco.cmake)
 
 IF(NOT ${Poco_FOUND})
@@ -284,16 +286,12 @@ MACRO(PLUGIN_INCLDIR _targetName)
    set(PLUGINS_ALL_INCLUDE_DIRS
       ${BOOST_INCL_DIR}
       ${Poco_INCLUDE_DIRS}
+      ${OPENSSL_INCLUDE_DIR}
       ${SHARED_INCL_DIR}
       ${plugin_cpp_api_INCLUDE_DIR}
       ${ARGN}
       )
          
-   #in case of OpenSSL found, just add openssl include dir
-   if(${OPENSSL_FOUND})
-      set(PLUGINS_ALL_INCLUDE_DIRS  ${PLUGINS_ALL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
-   endif()
-
 	set_property( TARGET ${_targetName} PROPERTY INCLUDE_DIRECTORIES ${PLUGINS_ALL_INCLUDE_DIRS})
 ENDMACRO()
 
@@ -301,6 +299,7 @@ MACRO(PLUGIN_LINK _targetName)
 	target_link_libraries(${_targetName}
       ${Boost_LIBRARIES}
       ${Poco_FOUND_LIBS}       
+      ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY}
       ${YADOMS_ROOT}/projects/shared/${CMAKE_CFG_INTDIR}/yadoms-shared.lib
       ${YADOMS_ROOT}/projects/plugin_cpp_api/${CMAKE_CFG_INTDIR}/plugin_cpp_api.lib
       ${YADOMS_ROOT}/projects/plugin_IPC/${CMAKE_CFG_INTDIR}/plugin_IPC.lib

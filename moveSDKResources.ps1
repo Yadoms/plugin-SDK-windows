@@ -1,12 +1,5 @@
 
 
-$cmakeRoot = ".\extra_libs\cmake-3.10.2"
-
-$yadomsRoot = ".\yadoms"
-$boostRoot = ".\extra_libs\boost_1_65_1"
-$pocoRoot = ".\extra_libs\poco-1.7.9-all"
-$protobufRoot = ".\extra_libs\protobuf-3.4.1"
-$sdkOut=".\SDK"
 
 $robocopyFlags="/MT","/np","/njh","/ns","/nc","/nfl","/ndl","/move"
   
@@ -35,6 +28,11 @@ robocopy "$pocoRoot\JSON\src" "$sdkOut\libs\poco\JSON\src" $robocopyFlags /e
 robocopy "$pocoRoot\JSON\include" "$sdkOut\libs\poco\JSON\include" $robocopyFlags /e
 robocopy "$pocoRoot\Foundation\src" "$sdkOut\libs\poco\Foundation\src" $robocopyFlags /e
 robocopy "$pocoRoot\Foundation\include" "$sdkOut\libs\poco\Foundation\include" $robocopyFlags /e
+
+# Copy OpenSSL
+Write-Host "Copy OpenSSL folder..."
+robocopy "$opensslRoot\include" "$sdkOut\libs\openssl\include" $robocopyFlags /e
+robocopy "$opensslRoot\lib" "$sdkOut\libs\openssl\lib" $robocopyFlags /e
 
 # Copy Protobuf
 Write-Host "Copy Protobuf folder..."
