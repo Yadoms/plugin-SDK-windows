@@ -41,6 +41,7 @@ install:
   - ps: if (!(Test-Path 'swig-3.0.12')) { Invoke-WebRequest http://yadoms.com/appveyor_build/swig-3.0.12-build.7z -OutFile swig.7z; 7z x swig.7z -bso0 }
   - ps: if (!(Test-Path 'protobuf-3.4.1')) { Invoke-WebRequest http://yadoms.com/appveyor_build/protobuf-3.4.1-build.7z -OutFile protobuf.7z; 7z x protobuf.7z -bso0 }
   - ps: if (!(Test-Path 'cmake-3.10.2')) { Invoke-WebRequest http://yadoms.com/appveyor_build/cmake-3.10.2-build.7z -OutFile cmake.7z; 7z x cmake.7z -bso0 }
+  - ps: ls
   - ps: rm *.7z
   - ps: popd    
   - ps: Write-Host "[END] install"
