@@ -48,8 +48,8 @@ install:
 # scripts to run before build
 before_build:
   # Yadoms sources
-  - ps: Write-Host "Downloading yadoms sources from $env:buildBranch branch..."
-  - cmd: git clone -q --depth=1 --branch=%buildBranch% git://github.com/Yadoms/yadoms.git
+  - ps: Write-Host "Downloading yadoms sources from $env:YadomsBranch branch..."
+  - cmd: git clone -q --depth=1 --branch=%YadomsBranch% git://github.com/Yadoms/yadoms.git
   
   # Read current Yadoms version
   - ps: $yadomsVersion = (Select-String -Path yadoms\sources\server\changelog.md -Pattern '^### (.*)$')[0] | Foreach-Object {$_.Matches} | Foreach-Object {$_.Groups[1].Value}
