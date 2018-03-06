@@ -40,7 +40,7 @@ install:
   - ps: if (!(Test-Path 'openssl-1.1.0g')) { Invoke-WebRequest http://yadoms.com/appveyor_build/openssl-1.1.0g-build.7z -OutFile openssl.7z; 7z x openssl.7z -bso0 }
   - ps: if (!(Test-Path 'swig-3.0.12')) { Invoke-WebRequest http://yadoms.com/appveyor_build/swig-3.0.12-build.7z -OutFile swig.7z; 7z x swig.7z -bso0 }
   - ps: if (!(Test-Path 'protobuf-3.4.1')) { Invoke-WebRequest http://yadoms.com/appveyor_build/protobuf-3.4.1-build.7z -OutFile protobuf.7z; 7z x protobuf.7z -bso0 }
-  - ps: if (!(Test-Path 'cmake-3.10.2')) { Invoke-WebRequest https://cmake.org/files/v3.10/cmake-3.10.2-win32-x86.zip -OutFile cmake.7z; 7z x cmake.7z -bso0 }
+  - ps: if (!(Test-Path 'cmake-3.10.2')) { Invoke-WebRequest http://yadoms.com/appveyor_build/cmake-3.10.2-build.7z -OutFile cmake.7z; 7z x cmake.7z -bso0 }
   - ps: rm *.7z
   - ps: popd    
   - ps: Write-Host "[END] install"
