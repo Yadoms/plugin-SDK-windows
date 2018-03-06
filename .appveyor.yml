@@ -66,8 +66,8 @@ before_build:
   - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(PROTOBUF_ROOT "' + $cd_for_cmake + '/extra_libs/protobuf-3.4.1")')
   - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(SWIG_ROOT "' + $cd_for_cmake + '/extra_libs/swig-3.0.12")')
   - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(PYTHON_ROOT "C:/Python27")')
-  - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(COTIRE_USE ON)')
-  - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(COTIRE_USE_UNITY ON)')
+  # - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(COTIRE_USE ON)')
+  # - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(COTIRE_USE_UNITY ON)')
   - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(PYTHON_USE_SOURCES OFF)')
   - ps: cat 'yadoms/sources/CMakeListsUserConfig.txt'
 
