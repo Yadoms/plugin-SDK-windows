@@ -41,7 +41,6 @@ install:
   - ps: if (!(Test-Path 'swig-3.0.12')) { Invoke-WebRequest http://yadoms.com/appveyor_build/swig-3.0.12-build.7z -OutFile swig.7z; 7z x swig.7z -bso0 }
   - ps: if (!(Test-Path 'protobuf-3.4.1')) { Invoke-WebRequest http://yadoms.com/appveyor_build/protobuf-3.4.1-build.7z -OutFile protobuf.7z; 7z x protobuf.7z -bso0 }
   - ps: if (!(Test-Path 'cmake-3.10.2')) { Invoke-WebRequest http://yadoms.com/appveyor_build/cmake-3.10.2-build.7z -OutFile cmake.7z; 7z x cmake.7z -bso0 }
-  - ps: ls
   - ps: rm *.7z
   - ps: popd    
   - ps: Write-Host "[END] install"
@@ -60,7 +59,7 @@ before_build:
   - ps: Write-Host "Create Yadoms configuration file CMakeListsUserConfig.txt..."
   - ps: $cd_for_cmake="$pwd".Replace("\", "/")
   - ps: Write-Host $cd_for_cmake
-  - ps: Set-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(ALTERNATIVE_CMAKE_ROOT "' + $cd_for_cmake + '/extra_libs/cmake-3.10.2")')
+  - ps: Set-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(ALTERNATIVE_CMAKE_ROOT "' + $cd_for_cmake + '/extra_libs/cmake-3.10.2-win32-x86")')
   - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(BOOST_ROOT "' + $cd_for_cmake + '/extra_libs/boost_1_65_1")')
   - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(POCO_ROOT "' + $cd_for_cmake + '/extra_libs/poco-1.8.1-all")')
   - ps: Add-Content 'yadoms/sources/CMakeListsUserConfig.txt' ('set(OPENSSL_ROOT "' + $cd_for_cmake + '/extra_libs/openssl-1.1.0g")')
