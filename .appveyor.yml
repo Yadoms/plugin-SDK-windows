@@ -90,8 +90,8 @@ build_script:
   # Build Yadoms
   - ps: pushd yadoms/projects
   - ps: Write-Host 'Build...'
-  - ps: msbuild shared/all_unity.vcxproj /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - ps: msbuild shared/all_unity.vcxproj /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - ps: msbuild shared/all_BUILD.vcxproj /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - ps: msbuild shared/all_BUILD.vcxproj /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
   - ps: Write-Host 'Finalize output...'
   - ps: cp ../config/yadoms.ini ../builds/DEBUG/
   - ps: cp ../config/yadoms.ini ../builds/RELEASE/
